@@ -22,8 +22,8 @@ def step_1():
                'Referer': 'http://172.20.124.12:8081/ibillingportal/wx/renew_pre.jsp?op=modifypwd'
                }
     post_data = {
-        'loginName': 'your login in username',  # you should write your username here.
-        'loginPwd': 'your password',  # you should write your password here.
+        'loginName': 'jt20140210610',  # you should write your username here.
+        'loginPwd': 'hiavril.520',  # you should write your password here.
         'vmode': "1",
         'verfiyCode': "",
         'queryString': ""
