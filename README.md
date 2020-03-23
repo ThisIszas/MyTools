@@ -1,3 +1,4 @@
 # MyTools
-some of my tools.<br>
-1.Excel2SQL:把excel里的数据转存到SQL里.
+
+Merge Excel rows by same value in the specfied fields.
+按照Excel里的指定列里的相同数据合并多行数据
