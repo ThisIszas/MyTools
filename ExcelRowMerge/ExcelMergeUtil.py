@@ -1,4 +1,4 @@
-from SFDCScript.MyUtils.ExcelRowMerge.MergeConfig import RowMergeMap
+from ExcelRowMerge.MergeConfig import RowMergeMap
 # import MergeConfig
 from datetime import datetime
 
