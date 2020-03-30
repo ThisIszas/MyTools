@@ -5,6 +5,7 @@ from datetime import datetime
 class ExcelMerge:
     def __init__(self, DataList: []):
         self.returnMap = {}
+        self.TextFieldPriorityMap = {}
         self.DataList: [] = DataList
         self.configMap: {} = RowMergeMap
 
@@ -14,7 +15,7 @@ class ExcelMerge:
             for eachKey in self.configMap.get('KeyFields'):
                 currentRowKey += eachRow.get(eachKey)
             if not self.returnMap.__contains__(currentRowKey):  # If this key isn't in the return map, initiate it
-                self.returnMap[currentRowKey] = {}              # with blank obj
+                self.returnMap[currentRowKey] = {}              # with blank obj/row
 
             for fieldName in eachRow.keys():
                 fieldConfig = {}
@@ -43,12 +44,12 @@ class ExcelMerge:
             else self.configMap.get('DataPreConvertMap').get(upperValue)
         # print(preParsedValue)
 
-        if not currentRow.__contains__(fieldName):
+        if not currentRow.__contains__(fieldName):  # If current raw didn't have this field, init with preParsedValue
             if fieldCfg.get('FieldType') == 'Date' and preParsedValue:
                 try:
                     preParsedValue = self.parseDate(preParsedValue)
                 except Exception:
-                    print(fieldName, ', ', preParsedValue, ', ',value, 'rowKey')
+                    print(fieldName, ', ', preParsedValue, ', ', value, 'rowKey')
                     quit()
             currentRow[fieldName] = preParsedValue
 
@@ -84,6 +85,17 @@ class ExcelMerge:
             elif fieldCfg.get('WhichValue') == 'Smallest' and not isBigger:
                 currentRow[fieldName] = dateValue
 
+        elif fieldType == 'Text':
+            priorityMap:{} = self.getPriorityMap(fieldCfg)
+            if (currentRow.get(fieldName) is None) and (preParsedValue is not None):  # 当前field第一次遇到非None的时候进行赋值
+                currentRow[fieldName] = preParsedValue
+            elif (not currentRow.get(fieldName) is None) and (preParsedValue is not None):  # 按优先级高的替换
+                currentValue = currentRow.get(fieldName) # The older value have higher priority if neither value existed in order list.
+                oldPriority = 10000 if not priorityMap.__contains__(currentValue) else priorityMap.get(currentValue)
+                newPriority = 10001 if not priorityMap.__contains__(preParsedValue) else priorityMap.get(preParsedValue)
+                if newPriority < oldPriority:
+                    currentRow[fieldName] = preParsedValue
+
         self.returnMap[rowKey] = currentRow
 
     @staticmethod
@@ -94,6 +106,18 @@ class ExcelMerge:
         elif value:
             dateValue = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
         return dateValue
+
+    def getPriorityMap(self, fieldConfig: {}):
+        fieldName = fieldConfig.get('FieldName')
+        if not self.TextFieldPriorityMap.__contains__(fieldName):
+            textPriorityMap = {}
+            textOrderedList = fieldConfig.get('OrderedList')
+            for i in range(len(textOrderedList)):
+                textPriorityMap[textOrderedList[i]] = i
+            self.TextFieldPriorityMap[fieldName] = textPriorityMap
+
+        return self.TextFieldPriorityMap.get(fieldName)
+
 #
 # DataList = [
 #     {'Mobile': '123', 'Show Room Traffic': 'true', 'Show Room Date': '2020-03-01', 'Other': 'other1'},
